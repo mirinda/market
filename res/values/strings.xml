@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="app_name">market</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Market</string>
+    <string name="paid">Paid</string>
+    <string name="cancel">Cancel</string>
+	<string name="cost">Cost:</string>
+	<string name="error_max_count">Sory, but no above 5 products</string>
+</resources>
