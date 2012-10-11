@@ -15,14 +15,15 @@ public final class R {
         public static final int ic_launcher=0x7f020001;
     }
     public static final class id {
-        public static final int cancel_button=0x7f070002;
-        public static final int cost=0x7f070004;
+        public static final int cancel_button=0x7f070003;
+        public static final int cost=0x7f070005;
         public static final int image=0x7f070000;
-        public static final int menu_settings=0x7f070007;
-        public static final int paid_button=0x7f070001;
-        public static final int product_costs_row=0x7f070005;
-        public static final int product_counts_row=0x7f070006;
-        public static final int product_name_row=0x7f070003;
+        public static final int menu_settings=0x7f070008;
+        public static final int paid_button=0x7f070002;
+        public static final int product_costs_row=0x7f070006;
+        public static final int product_counts_row=0x7f070007;
+        public static final int product_name_row=0x7f070004;
+        public static final int saved_path=0x7f070001;
     }
     public static final class layout {
         public static final int activity_image=0x7f030000;
@@ -37,13 +38,16 @@ public final class R {
         public static final int app_name=0x7f040000;
         public static final int cancel=0x7f040004;
         public static final int cost=0x7f040005;
+        public static final int err_task_is_stopped=0x7f04000c;
         public static final int error_max_count=0x7f040006;
         public static final int hello_world=0x7f040007;
         public static final int menu_settings=0x7f040001;
         public static final int paid=0x7f040003;
+        public static final int path_to_img=0x7f04000d;
         public static final int title_activity_image=0x7f040008;
         public static final int title_activity_main=0x7f040002;
         public static final int wrn_choose_product=0x7f04000a;
+        public static final int wrn_task_is_cancelled=0x7f04000b;
         public static final int wrn_task_running_now=0x7f040009;
     }
     public static final class style {

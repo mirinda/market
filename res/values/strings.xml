@@ -11,4 +11,7 @@
     <string name="title_activity_image">ImageActivity</string>
 	<string name="wrn_task_running_now">Task is running now! </string>
 	<string name="wrn_choose_product">Choose product!</string>
+	<string name="wrn_task_is_cancelled">Task is cancelled</string>
+	<string name="err_task_is_stopped">Error! Task is Stopped. Make sure that exist an internet connection and access to the memory card </string>
+	<string name="path_to_img">Path to image from sdcard:</string>
 </resources>

@@ -26,11 +26,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends ListActivity implements OnClickListener {
+	private static final int HOLDER_COUNT=30;
 	private static final int PRODUCT_COUNT = 30;
 	private static final int PAID_COUNT = 5;
 	private static final int MAX_COST = 500;
-	private static final int DURATION = 200; 
+	private static final int DURATION = 300; 
 	private static final String JPG_URL = "http://digitalclick.ru/oplacheno.jpg";
+	
 
 	private static Bitmap bmp = null;
 	private static Paint arialPaint = new Paint();
@@ -39,7 +41,9 @@ public class MainActivity extends ListActivity implements OnClickListener {
 	public static final int IMG_HEIGHT = 350;
 	public static final String FONT_NAME = "arial.ttf";
 	public static final float FONT_SIZE = 24;
-
+	public static final String SAVED_PATH="";// from sdcard(not root).
+	public static final String FILE_NAME="Paid.png";
+	
 	public static Bitmap getBmp() {
 		return bmp;
 	}
@@ -128,7 +132,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 	}
 
 	private class MyAdapter extends BaseAdapter {
-		ArrayList<ViewHolder> holders =new ArrayList<MainActivity.ViewHolder>(40);
+		ArrayList<ViewHolder> holders =new ArrayList<MainActivity.ViewHolder>(HOLDER_COUNT);
 		
 		Context context;
 
@@ -178,8 +182,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 									return;
 								int pos = (Integer) v.getTag();
 								EditText editText = (EditText) v;
-								int count = Integer.parseInt(editText.getText()
-										.toString());
+								int count = parseInt(editText.getText()+"");
 								count = verifyFreeCount(pos, count);
 								editText.setText(count + "");
 
@@ -191,8 +194,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 
 				int oldPosition = Integer.parseInt(viewHolder.count.getTag()
 						.toString());
-				int count = Integer.parseInt(viewHolder.count.getText()
-						.toString());
+				int count = parseInt(viewHolder.count.getText()+"");
 				verifyFreeCount(oldPosition, count);
 
 			}
@@ -204,7 +206,13 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			rowView.setTag(viewHolder);
 			return rowView;
 		}
-
+		
+		public void clear(){
+			for (ViewHolder holder : holders) {
+				holder.count.setText(0+"");
+			}
+		}
+		
 		/**
 		 * this function see, that users chosen products count < 5
 		 * 
@@ -213,7 +221,7 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		 * @param count
 		 *            - number in current element
 		 */
-		int verifyFreeCount(int pos, int count) {
+		private int verifyFreeCount(int pos, int count) {
 			if (productsCount[pos] < count) {
 				if (count > freeCount) {
 					Toast.makeText(
@@ -226,21 +234,19 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			} else {
 				freeCount += productsCount[pos] - count;
 			}
-			Log.i("mirinda1", "count=" + count + "; freeCount=" + freeCount
-					+ "; pos=" + pos);
+			//Log.i("mirinda1", "count=" + count + "; freeCount=" + freeCount + "; pos=" + pos);
 			productsCount[pos] = count;
 			return count;
 		}
-		public void clear(){
-			for (ViewHolder holder : holders) {
-				holder.count.setText(0+"");
-			}
+		
+		private int parseInt(String s){
+			return s!=""?Integer.parseInt(s):0;
 		}
 	}
 
 	private class MyTask extends AsyncTask<int[], Void, Bitmap> {
 		private Context context;
-
+		
 		MyTask(Context context) {
 			this.context = context;
 		}
@@ -256,13 +262,23 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			Log.i("mirinda1", "start background");
 			Downloader downloader = new Downloader();
 			Generator generator = new Generator();
-
+			Saver saver = new Saver();
+			
 			Bitmap paidBitmap = downloader.downloadImage(MainActivity.JPG_URL);
-			// TODO if null
-			Log.i("mirinda1", "is bitmap null:" + (paidBitmap == null));
-
+			if(isCancelled()||paidBitmap==null){ 
+				return null;
+			}
 			Bitmap bitmap = generator.generateBitmap(params[0], paidBitmap);
-
+			if(isCancelled()){
+				return null;
+			}
+			boolean isSaved = saver.saveBitmap(bitmap, "");
+			if(!isSaved){
+				return null;
+			}	
+			if(isCancelled()){
+				return null;
+			}
 			return bitmap;
 		}
 
@@ -270,6 +286,15 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		protected void onPostExecute(Bitmap result) {
 
 			super.onPostExecute(result);
+			task=null;
+			if(isCancelled()){
+				return;
+			}			
+			if(result==null){
+				Toast.makeText(context, getResources().getString(R.string.err_task_is_stopped), DURATION).show();
+				return;
+			}
+			
 			bmp = result;
 			Intent intent = new Intent();
 			intent.setClass(context, ImageActivity.class);
