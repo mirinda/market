@@ -5,6 +5,9 @@
     <string name="title_activity_main">Market</string>
     <string name="paid">Paid</string>
     <string name="cancel">Cancel</string>
-	<string name="cost">Cost:</string>
-	<string name="error_max_count">Sory, but no above 5 products</string>
+    <string name="cost">Cost:</string>
+    <string name="error_max_count">Sory, but no above 5 products</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_image">ImageActivity</string>
+
 </resources>
