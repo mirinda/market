@@ -43,6 +43,8 @@ public final class R {
         public static final int paid=0x7f040003;
         public static final int title_activity_image=0x7f040008;
         public static final int title_activity_main=0x7f040002;
+        public static final int wrn_choose_product=0x7f04000a;
+        public static final int wrn_task_running_now=0x7f040009;
     }
     public static final class style {
         public static final int AppTheme=0x7f050000;

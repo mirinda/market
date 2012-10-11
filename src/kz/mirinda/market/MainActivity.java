@@ -1,56 +1,60 @@
 package kz.mirinda.market;
 
+import java.util.ArrayList;
 import java.util.Random;
 
-import android.R.color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TextView.OnEditorActionListener;
-import android.widget.LinearLayout;
 
 public class MainActivity extends ListActivity implements OnClickListener {
 	private static final int PRODUCT_COUNT = 30;
 	private static final int PAID_COUNT = 5;
 	private static final int MAX_COST = 500;
-	private static final int DURATION = 200; //duration of toast
-	private static final String JPG_URL="http://digitalclick.ru/oplacheno.jpg";
-	
-	private static Bitmap bmp=null;
-	
-	public static final int IMG_WIDTH=640;
-	public static final int IMG_HEIGHT=350;
-	
-	public static Bitmap getBmp(){return bmp;}
-	
+	private static final int DURATION = 200; 
+	private static final String JPG_URL = "http://digitalclick.ru/oplacheno.jpg";
+
+	private static Bitmap bmp = null;
+	private static Paint arialPaint = new Paint();
+
+	public static final int IMG_WIDTH = 640;
+	public static final int IMG_HEIGHT = 350;
+	public static final String FONT_NAME = "arial.ttf";
+	public static final float FONT_SIZE = 24;
+
+	public static Bitmap getBmp() {
+		return bmp;
+	}
+
+	public static Paint getArialPaint() {
+		return arialPaint;
+	}
+
 	private String[] productsName = new String[PRODUCT_COUNT]; //
 	private int[] productsCount = new int[PRODUCT_COUNT];
 	private int[] productsCost = new int[PRODUCT_COUNT];
 	private int freeCount = PAID_COUNT;
-	private MyTask task = new MyTask(this); 
-	private Button paidButton;
+	private MyTask task = null;// new MyTask(this);
+	private Button paidButton, cancelButton;
+
 	private class ViewHolder {
 		public TextView name;
 		public TextView cost;
@@ -61,11 +65,18 @@ public class MainActivity extends ListActivity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		paidButton=  (Button) findViewById(R.id.paid_button);
+		paidButton = (Button) findViewById(R.id.paid_button);
 		paidButton.setOnClickListener(this);
+		cancelButton = (Button) findViewById(R.id.cancel_button);
+		cancelButton.setOnClickListener(this);
+
 		init();
 		setListAdapter(new MyAdapter(this));
-		
+
+		Typeface typeface = Typeface.createFromAsset(getAssets(), FONT_NAME);
+		arialPaint.setTextSize(FONT_SIZE);
+		arialPaint.setTypeface(typeface);
+		arialPaint.setColor(Color.BLACK);
 	}
 
 	private void init() {
@@ -83,15 +94,42 @@ public class MainActivity extends ListActivity implements OnClickListener {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
-	
+
 	@Override
 	public void onClick(View v) {
-		task.execute(productsCount);
-		
+		if (v.getId() == R.id.paid_button) {
+			Log.i("mirinda1", "Paid");
+			if (freeCount == 5) {
+				Toast.makeText(this,
+						getResources().getString(R.string.wrn_choose_product),
+						DURATION).show();
+				return;
+			}
+			if (task == null) {
+				task = new MyTask(this);
+				task.execute(productsCount);
+			} else {
+				Toast.makeText(
+						this,
+						getResources().getString(R.string.wrn_task_running_now),
+						DURATION).show();
+			}
+		}else if (v.getId()==R.id.cancel_button) {
+			Log.i("mirinda1", "Cancel");
+			if(task!=null){
+				task.cancel(false);
+			}
+			for(int i=0;i<productsCount.length;i++) productsCount[i]=0;
+			freeCount=PAID_COUNT;
+			task=null;
+			((MyAdapter)getListAdapter()).clear();
+			
+		}
 	}
 
 	private class MyAdapter extends BaseAdapter {
-
+		ArrayList<ViewHolder> holders =new ArrayList<MainActivity.ViewHolder>(40);
+		
 		Context context;
 
 		public MyAdapter(Context context) {
@@ -134,27 +172,31 @@ public class MainActivity extends ListActivity implements OnClickListener {
 						.setOnFocusChangeListener(new OnFocusChangeListener() {
 							@Override
 							public void onFocusChange(View v, boolean hasFocus) {
-								Log.i("mirinda1","OnFocus Changed: "+hasFocus);
-								if(hasFocus)return;
+								Log.i("mirinda1", "OnFocus Changed: "
+										+ hasFocus);
+								if (hasFocus)
+									return;
 								int pos = (Integer) v.getTag();
 								EditText editText = (EditText) v;
 								int count = Integer.parseInt(editText.getText()
 										.toString());
-								count = verifyFreeCount(pos, count);								
-								editText.setText(count+"");
-								
+								count = verifyFreeCount(pos, count);
+								editText.setText(count + "");
+
 							}
 						});
+				holders.add(viewHolder);
 			} else {
 				viewHolder = (ViewHolder) rowView.getTag();
-				
-				
-				int oldPosition = Integer.parseInt(viewHolder.count.getTag().toString());
-				int count = Integer.parseInt(viewHolder.count.getText().toString());
+
+				int oldPosition = Integer.parseInt(viewHolder.count.getTag()
+						.toString());
+				int count = Integer.parseInt(viewHolder.count.getText()
+						.toString());
 				verifyFreeCount(oldPosition, count);
-				
+
 			}
-			
+
 			viewHolder.name.setText(productsName[position]);
 			viewHolder.cost.setText(productsCost[position] + "");
 			viewHolder.count.setText(productsCount[position] + "");
@@ -162,77 +204,78 @@ public class MainActivity extends ListActivity implements OnClickListener {
 			rowView.setTag(viewHolder);
 			return rowView;
 		}
-		
+
 		/**
-		 * this function see, that users chosen products count < 5 
+		 * this function see, that users chosen products count < 5
 		 * 
-		 * @param pos - position of current element
-		 * @param count - number in current element
+		 * @param pos
+		 *            - position of current element
+		 * @param count
+		 *            - number in current element
 		 */
-		int verifyFreeCount(int pos, int count){
+		int verifyFreeCount(int pos, int count) {
 			if (productsCount[pos] < count) {
 				if (count > freeCount) {
 					Toast.makeText(
 							context,
-							context.getResources()
-									.getString(
-											R.string.error_max_count),
-							DURATION).show();
-					count = freeCount+productsCount[pos];
+							context.getResources().getString(
+									R.string.error_max_count), DURATION).show();
+					count = freeCount + productsCount[pos];
 				}
 				freeCount -= count - productsCount[pos];
-			}else{
-				freeCount+=  productsCount[pos]-count;
+			} else {
+				freeCount += productsCount[pos] - count;
 			}
-			Log.i("mirinda1","count="+count+"; freeCount="+freeCount+"; pos="+pos);
-			productsCount[pos]=count;
+			Log.i("mirinda1", "count=" + count + "; freeCount=" + freeCount
+					+ "; pos=" + pos);
+			productsCount[pos] = count;
 			return count;
 		}
-		
-		
+		public void clear(){
+			for (ViewHolder holder : holders) {
+				holder.count.setText(0+"");
+			}
+		}
 	}
 
-	private class MyTask extends AsyncTask<int[], Void, Bitmap>{
+	private class MyTask extends AsyncTask<int[], Void, Bitmap> {
 		private Context context;
 
-
-		MyTask(Context context){
+		MyTask(Context context) {
 			this.context = context;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
-			
+
 			super.onPreExecute();
 		}
+
 		@Override
 		protected Bitmap doInBackground(int[]... params) {
 			Log.i("mirinda1", "start background");
 			Downloader downloader = new Downloader();
 			Generator generator = new Generator();
-			
+
 			Bitmap paidBitmap = downloader.downloadImage(MainActivity.JPG_URL);
-			//TODO if null
-			Log.i("mirinda1", "is bitmap null:"+(paidBitmap==null));
-			
+			// TODO if null
+			Log.i("mirinda1", "is bitmap null:" + (paidBitmap == null));
+
 			Bitmap bitmap = generator.generateBitmap(params[0], paidBitmap);
-			//TODO 
+
 			return bitmap;
 		}
-		
 
-		@SuppressWarnings("deprecation")
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			
+
 			super.onPostExecute(result);
-			bmp=result;
+			bmp = result;
 			Intent intent = new Intent();
 			intent.setClass(context, ImageActivity.class);
 			startActivity(intent);
 		}
-		
+
 	}
 
-	
 }

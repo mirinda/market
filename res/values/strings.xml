@@ -9,5 +9,6 @@
     <string name="error_max_count">Sory, but no above 5 products</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_image">ImageActivity</string>
-
+	<string name="wrn_task_running_now">Task is running now! </string>
+	<string name="wrn_choose_product">Choose product!</string>
 </resources>
